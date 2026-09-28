@@ -1,0 +1,57 @@
+name: Deploy docs
+
+on:
+  repository_dispatch:
+    types: [docs-updated] # sent by lizt-backend when docs/ changes on main
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only docs/ from lizt-backend main, via a read-only deploy key.
+      - name: Check out lizt-backend docs
+        uses: actions/checkout@v4
+        with:
+          repository: QueenSonia/Lizt-Backend
+          ref: main
+          ssh-key: ${{ secrets.BACKEND_DEPLOY_KEY }}
+          path: backend
+          sparse-checkout: docs
+          sparse-checkout-cone-mode: true
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Sync docs
+        run: npm run sync
+        env:
+          DOCS_SOURCE: backend/docs
+
+      # vercel build runs `npm run build` (Astro) and packages the output for Vercel.
+      - name: Build
+        run: |
+          npx vercel@latest pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          npx vercel@latest build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        run: npx vercel@latest deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

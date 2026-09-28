@@ -1,0 +1,8 @@
+# Synced from lizt-backend/docs/ — never commit content here.
+src/content/docs/
+
+node_modules/
+dist/
+.astro/
+.vercel/
+.env*
