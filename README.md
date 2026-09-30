@@ -9,13 +9,18 @@ The website for the Lizt documentation, built with [Astro Starlight](https://sta
 `scripts/sync-docs.mjs` copies `lizt-backend/docs/` into `src/content/docs/`, which Starlight builds into the site.
 
 - It deletes `src/content/docs/` first, so the site always matches the source exactly.
-- It skips `_plan.md` (the private docs plan) and `engineering/runbooks/` (internal only).
-- It rewrites relative links such as `../rules/wallet.md` into site URLs such as `/product/rules/wallet/`, so the same links work on GitHub and on the site.
+- It skips anything whose name starts with `_`, such as `_plan.md` (the private docs plan) and each feature's `_runbook.md` (internal only).
+- It rewrites relative links such as `../renewals/product.md` into site URLs such as `/features/renewals/product/`, so the same links work on GitHub and on the site.
 - It reads from `../lizt-backend/docs` by default, or from the `DOCS_SOURCE` environment variable if set (used in CI).
 
 `src/content/docs/` is in `.gitignore`, so synced content is never committed here.
 
-The sidebar has three sections, Product, Engineering and Reference, generated from the folders of the same names. Folders inside them become groups, and each page's `title` frontmatter becomes its sidebar label.
+Docs are organised by feature: `features/<feature>/` holds `product.md`, `engineering.md` and sometimes `support.md`. The sidebar has four sections:
+
+- **Start here** — `glossary.md` and `roles.md`.
+- **Features** — one group per folder in `features/`, labelled from the folder name (`payment-plans` becomes "Payment plans"). `astro.config.mjs` builds these groups from the synced content. Pages inside a group use their `sidebar.label` and `sidebar.order` frontmatter.
+- **Engineering** — `architecture.md` and the `decisions/` folder.
+- **Reference** — the `reference/` folder.
 
 ## Preview locally
 

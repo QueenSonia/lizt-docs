@@ -8,9 +8,6 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const source = path.resolve(root, process.env.DOCS_SOURCE ?? '../lizt-backend/docs');
 const target = path.join(root, 'src/content/docs');
 
-// Paths relative to the docs root, using forward slashes.
-const EXCLUDED = ['_plan.md', 'engineering/runbooks'];
-
 if (!fs.existsSync(source)) {
   console.error(`Docs source not found: ${source}`);
   console.error('Clone lizt-backend next to lizt-docs, or set DOCS_SOURCE.');
@@ -18,7 +15,8 @@ if (!fs.existsSync(source)) {
 }
 
 const toPosix = (p) => p.split(path.sep).join('/');
-const isExcluded = (rel) => EXCLUDED.some((ex) => rel === ex || rel.startsWith(`${ex}/`));
+// Private: any file or folder whose name starts with "_" (_plan.md, _runbook.md…).
+const isExcluded = (rel) => rel.split('/').some((segment) => segment.startsWith('_'));
 
 // "product/rules/wallet.md" -> "/product/rules/wallet/"; "index.md" -> "/"
 const pageUrl = (rel) => {
