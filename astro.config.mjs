@@ -15,7 +15,7 @@ const featureGroups = fs.existsSync(featuresDir)
       .map((entry) => {
         const words = entry.name.replace(/-/g, ' ');
         return {
-          label: words.charAt(0).toUpperCase() + words.slice(1),
+          label: (words.charAt(0).toUpperCase() + words.slice(1)).replace(/^Whatsapp/, 'WhatsApp'),
           collapsed: true,
           items: [{ autogenerate: { directory: `features/${entry.name}` } }],
         };
