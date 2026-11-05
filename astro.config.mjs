@@ -28,6 +28,7 @@ export default defineConfig({
     mermaid({ autoTheme: true }),
     starlight({
       title: 'Lizt Docs',
+      favicon: '/favicon.ico',
       // Search (Pagefind) is built into Starlight and on by default.
       sidebar: [
         { label: 'Start here', items: ['glossary', 'roles'] },
