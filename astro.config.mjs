@@ -29,6 +29,7 @@ export default defineConfig({
     starlight({
       title: 'Lizt Docs',
       favicon: '/favicon.ico',
+      logo: { src: './src/assets/logo.png' },
       // Search (Pagefind) is built into Starlight and on by default.
       sidebar: [
         { label: 'Start here', items: ['glossary', 'roles'] },
