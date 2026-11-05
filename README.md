@@ -48,6 +48,29 @@ Other scripts:
 - `npm run sync` — copy the docs only.
 - `npm run build` — build the site into `dist/` (run `npm run sync` first).
 - `npm run preview` — serve the built site.
+- `npm test` — test the login gate.
+
+## Login gate
+
+Only signed-in Lizt accounts with an allowed role can read the deployed site. `middleware.js` runs on Vercel before every request, including assets and the search index. It doesn't run under `npm run dev`, so local previews stay open.
+
+1. With no valid `docs_session` cookie, a page load redirects to `/docs-access` on the Lizt app, carrying the hash of a random secret. The secret stays here in a short-lived cookie. A background request gets a 401 instead.
+2. The app checks the session with the backend, then the role. The allowed roles are in `lizt-frontend/src/app/docs-access/route.ts`, the only place to change them.
+3. The app redirects to `/__auth/callback` with a signed pass that lasts 60 seconds and contains the hash.
+4. The middleware checks the signature, the expiry and that the hash matches this browser's secret, so a pass copied from a URL doesn't work elsewhere. It then sets `docs_session` for 24 hours.
+
+The cookie is never rechecked with the app, so someone who loses their role or signs out keeps access until it expires. To lock everyone out now, change `DOCS_ACCESS_SECRET` in both Vercel projects.
+
+Environment variables, set in each project's Vercel settings:
+
+| Project | Variable | Value |
+| --- | --- | --- |
+| lizt-docs | `DOCS_ACCESS_SECRET` | A long random string, the same in both projects |
+| lizt-docs | `LIZT_APP_URL` | The Lizt app's address, such as `https://www.lizt.co` |
+| lizt-frontend | `DOCS_ACCESS_SECRET` | The same string |
+| lizt-frontend | `DOCS_SITE_URL` | This site's address |
+
+If they're missing, the site stays locked and shows an error rather than opening.
 
 ## Writing pages (in lizt-backend)
 
